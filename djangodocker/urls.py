@@ -20,5 +20,7 @@ from djangodocker import views
 
 urlpatterns = [
     url(r'^$', views.index),
+    url(r'^todos/add', views.add_todo),
+    url(r'^todos/(?P<todo_id>\d+)/toggle', views.toggle_todo),
     url(r'^admin/', admin.site.urls),
 ]

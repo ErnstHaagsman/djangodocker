@@ -3,15 +3,131 @@
 <head>
     <meta charset="UTF-8">
     <title>Todos</title>
+
+    {% load static %}
+    <script type="text/javascript" src="{% static "djangodocker/jquery-3.2.1.js" %}"></script>
+
+    <script type="text/javascript">
+        $(function() {
+
+            // Django boilerplate for dealing with CSRF
+            function getCookie(name) {
+                var cookieValue = null;
+                if (document.cookie && document.cookie !== '') {
+                    var cookies = document.cookie.split(';');
+                    for (var i = 0; i < cookies.length; i++) {
+                        var cookie = jQuery.trim(cookies[i]);
+                        // Does this cookie string begin with the name we want?
+                        if (cookie.substring(0, name.length + 1) === (name + '=')) {
+                            cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                            break;
+                        }
+                    }
+                }
+                return cookieValue;
+            }
+            var csrftoken = getCookie('csrftoken');
+
+            function csrfSafeMethod(method) {
+                // these HTTP methods do not require CSRF protection
+                return (/^(GET|HEAD|OPTIONS|TRACE)$/.test(method));
+            }
+            $.ajaxSetup({
+                beforeSend: function(xhr, settings) {
+                    if (!csrfSafeMethod(settings.type) && !this.crossDomain) {
+                        xhr.setRequestHeader("X-CSRFToken", csrftoken);
+                    }
+                }
+            });
+
+            $(".todo input[type=checkbox]").on("click", function(e){
+                var todo_checkbox = $(this);
+                var id = todo_checkbox.data('id');
+
+                $.post("/todos/" + id + "/toggle", {}, function(data){
+                    // Toggle the checkbox
+                    var checked = data.done;
+                    todo_checkbox.prop('checked', checked);
+
+                    // Set or remove parent div's "checked" class
+                    var parent = todo_checkbox.parent();
+                    if (checked){
+                        parent.addClass('checked');
+                    } else {
+                        parent.removeClass('checked');
+                    }
+                })
+            })
+        });
+    </script>
+
+    <style>
+        body {
+            font-family: "Lato", sans-serif;
+        }
+
+        h1 {
+            margin-left: 50px;
+        }
+
+        .task_form {
+            margin-left: 50px;
+            width: 800px;
+            border: 5px solid black;
+            padding-top: 30px;
+            padding-bottom: 30px;
+            padding-left: 15px;
+            border-radius: 15px;
+            margin-bottom: 35px;
+        }
+
+        .task_form label {
+            font-size: 18px;
+        }
+
+        .task_form input {
+            font-size: 18px;
+        }
+
+        #id_todo_text {
+            width: 80%;
+            margin-left: 10px;
+        }
+
+        .todo {
+            margin-left:35px;
+            height: 35px;
+            margin-top: 15px;
+            font-size: 18px;
+        }
+
+        .checked {
+            text-decoration: line-through;
+            color: #CCC;
+        }
+
+        .todo input[type=checkbox] {
+            width: 40px;
+        }
+    </style>
 </head>
 <body>
 
 <h1>Todo</h1>
 
+<div class="task_form">
+    <form action="/todos/add" method="post">
+        {%  csrf_token %}
+        {{ task_form }}
+        <input type="submit" value="Add">
+    </form>
+</div>
+
 {% for todo in todos %}
-    <div class="todo">
+    <div class="todo{% if todo.done %} checked{% endif %}">
         <input
                 type="checkbox"
+                data-id="{{ todo.id }}"
                 name="todo-{{ todo.id }}-checked"
                 id="todo-{{ todo.id }}-checked"
                 {% if todo.done %}
