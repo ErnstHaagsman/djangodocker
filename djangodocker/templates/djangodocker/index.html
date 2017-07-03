@@ -1,0 +1,28 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Todos</title>
+</head>
+<body>
+
+<h1>Todo</h1>
+
+{% for todo in todos %}
+    <div class="todo">
+        <input
+                type="checkbox"
+                name="todo-{{ todo.id }}-checked"
+                id="todo-{{ todo.id }}-checked"
+                {% if todo.done %}
+                    checked
+                {% endif %}
+                />
+        <label for="todo-{{ todo.id }}-checked">
+            {{ todo.todo_text }}
+        </label>
+    </div>
+{% endfor %}
+
+</body>
+</html>
