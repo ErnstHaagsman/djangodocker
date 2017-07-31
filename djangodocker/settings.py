@@ -25,7 +25,7 @@ SECRET_KEY = '_(g#-==3_y-0fp(!dc_6=ukct@xeuz%$k^1pdp8wc8ql3#4pjq'
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = ['192.168.99.100']
+ALLOWED_HOSTS = []
 
 
 # Application definition
@@ -78,10 +78,10 @@ WSGI_APPLICATION = 'djangodocker.wsgi.application'
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.postgresql',
-        'NAME': 'postgres',
-        'USER': 'postgres',
+        'NAME': 'djangotodo',
+        'USER': 'djangotodo',
         'PASSWORD': 'hunter2',
-        'HOST': 'db'
+        'HOST': 'localhost'
     }
 }
 
