@@ -1,6 +1,15 @@
 version: '2'
 services:
   web:
+    image: "jmferrer/apache2-reverse-proxy:debian8"
+    volumes:
+      - ./apache:/etc/apache2/sites-enabled
+    links:
+      - app
+    ports:
+      - "80:80"
+
+  app:
     build: .
     ports:
      - "8000:8000"
