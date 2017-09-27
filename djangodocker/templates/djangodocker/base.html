@@ -17,6 +17,9 @@
     {% if user.is_authenticated %} 
     <ul class="userinfo">
         <li>{{ user.username }}</li>
+        {% if user.is_staff %}
+            <li><a href="{% url 'admin:index' %}">admin</a></li>
+        {% endif %}
         <li><a href="{% url 'logout' %}">log out</a></li>
     </ul>
     {% endif %}
