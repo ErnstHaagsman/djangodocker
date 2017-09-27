@@ -1,11 +1,29 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <title>Todos</title>
+{% extends 'djangodocker/base.html' %}
+{% block content %}
+    <div class="task_form">
+        <form action="/todos/add" method="post">
+            {%  csrf_token %}
+            {{ task_form }}
+            <input type="submit" value="Add">
+        </form>
+    </div>
 
-    {% load static %}
-    <script type="text/javascript" src="{% static "djangodocker/jquery-3.2.1.js" %}"></script>
+    {% for todo in todos %}
+        <div class="todo{% if todo.done %} checked{% endif %}">
+            <input
+                    type="checkbox"
+                    data-id="{{ todo.id }}"
+                    name="todo-{{ todo.id }}-checked"
+                    id="todo-{{ todo.id }}-checked"
+                    {% if todo.done %}
+                        checked
+                    {% endif %}
+                    />
+            <label for="todo-{{ todo.id }}-checked">
+                {{ todo.todo_text }}
+            </label>
+        </div>
+    {% endfor %}
 
     <script type="text/javascript">
         $(function() {
@@ -60,37 +78,4 @@
             })
         });
     </script>
-
-    <link rel="stylesheet" href="{% static "djangodocker/style.css" %}">
-</head>
-<body>
-
-<h1>Todo</h1>
-
-<div class="task_form">
-    <form action="/todos/add" method="post">
-        {%  csrf_token %}
-        {{ task_form }}
-        <input type="submit" value="Add">
-    </form>
-</div>
-
-{% for todo in todos %}
-    <div class="todo{% if todo.done %} checked{% endif %}">
-        <input
-                type="checkbox"
-                data-id="{{ todo.id }}"
-                name="todo-{{ todo.id }}-checked"
-                id="todo-{{ todo.id }}-checked"
-                {% if todo.done %}
-                    checked
-                {% endif %}
-                />
-        <label for="todo-{{ todo.id }}-checked">
-            {{ todo.todo_text }}
-        </label>
-    </div>
-{% endfor %}
-
-</body>
-</html>
+{% endblock %}
