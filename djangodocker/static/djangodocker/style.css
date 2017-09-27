@@ -1,0 +1,47 @@
+body {
+    font-family: "Lato", sans-serif;
+}
+
+h1 {
+    margin-left: 50px;
+}
+
+.task_form {
+    margin-left: 50px;
+    width: 800px;
+    border: 5px solid black;
+    padding-top: 30px;
+    padding-bottom: 30px;
+    padding-left: 15px;
+    border-radius: 15px;
+    margin-bottom: 35px;
+}
+
+.task_form label {
+    font-size: 18px;
+}
+
+.task_form input {
+    font-size: 18px;
+}
+
+#id_todo_text {
+    width: 80%;
+    margin-left: 10px;
+}
+
+.todo {
+    margin-left:35px;
+    height: 35px;
+    margin-top: 15px;
+    font-size: 18px;
+}
+
+.checked {
+    text-decoration: line-through;
+    color: #CCC;
+}
+
+.todo input[type=checkbox] {
+    width: 40px;
+}
