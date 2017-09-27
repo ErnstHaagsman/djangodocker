@@ -8,7 +8,7 @@ from .models import Todo
 
 @login_required
 def index(request):
-    todos = Todo.objects.all()
+    todos = Todo.objects.filter(author=request.user)
     task_form = TaskForm()
     context = {
         'todos': todos,
@@ -23,6 +23,7 @@ def add_todo(request):
         if form.is_valid():
             new_todo = Todo()
             new_todo.todo_text = form.cleaned_data['todo_text']
+            new_todo.author = request.user
             new_todo.save()
 
     return HttpResponseRedirect('/')
