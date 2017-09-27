@@ -11,7 +11,16 @@
 </head>
 <body>
 
-<h1>Todo</h1>
+<div class="topbar">
+    <h1>Todo</h1>
+
+    {% if user.is_authenticated %} 
+    <ul class="userinfo">
+        <li>{{ user.username }}</li>
+        <li><a href="{% url 'logout' %}">log out</a></li>
+    </ul>
+    {% endif %}
+</div>
 
 {% block content %}
 {% endblock %}

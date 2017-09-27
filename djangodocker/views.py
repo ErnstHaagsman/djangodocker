@@ -1,3 +1,4 @@
+from django.contrib.auth.decorators import login_required
 from django.http import HttpResponseRedirect, JsonResponse
 from django.shortcuts import render, get_object_or_404
 
@@ -5,6 +6,7 @@ from djangodocker.forms import TaskForm
 from .models import Todo
 
 
+@login_required
 def index(request):
     todos = Todo.objects.all()
     task_form = TaskForm()

@@ -1,13 +1,9 @@
 body {
     font-family: "Lato", sans-serif;
-}
-
-h1 {
     margin-left: 50px;
 }
 
 .task_form {
-    margin-left: 50px;
     width: 800px;
     border: 5px solid black;
     padding-top: 30px;
@@ -31,7 +27,6 @@ h1 {
 }
 
 .todo {
-    margin-left:35px;
     height: 35px;
     margin-top: 15px;
     font-size: 18px;
@@ -44,4 +39,33 @@ h1 {
 
 .todo input[type=checkbox] {
     width: 40px;
+}
+
+.topbar {
+    width: 800px;
+    display: flex;
+    align-items: center;
+}
+
+.topbar h1 {
+    margin-left: 0;
+}
+
+.userinfo {
+    margin-left: auto;
+    list-style: none;
+}
+
+.userinfo li {
+    float: left;
+}
+
+.userinfo li::before{
+    content: '|';
+    padding-left: 1em;
+    padding-right: 1em;
+}
+
+.userinfo li:first-of-type::before{
+    content: '';
 }

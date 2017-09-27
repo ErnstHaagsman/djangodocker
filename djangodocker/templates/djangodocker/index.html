@@ -8,6 +8,8 @@
         </form>
     </div>
 
+    <h2>{{ user.username }}'s todos</h2>
+
     {% for todo in todos %}
         <div class="todo{% if todo.done %} checked{% endif %}">
             <input

@@ -13,7 +13,7 @@ Including another URLconf
     1. Import the include() function: from django.conf.urls import url, include
     2. Add a URL to urlpatterns:  url(r'^blog/', include('blog.urls'))
 """
-from django.conf.urls import url
+from django.conf.urls import url, include
 from django.contrib import admin
 
 from djangodocker import views
@@ -23,4 +23,5 @@ urlpatterns = [
     url(r'^todos/add', views.add_todo),
     url(r'^todos/(?P<todo_id>\d+)/toggle', views.toggle_todo),
     url(r'^admin/', admin.site.urls),
+    url(r'^', include('django.contrib.auth.urls'))
 ]
