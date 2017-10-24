@@ -2,6 +2,25 @@
 
 {% block content %}
 
+<script type="text/javascript">
+
+$(function(){
+    $('a', '.logintoggle').on('click', function(args){
+      var clickedLink = $(args.target);
+      var enable = clickedLink.data('enable');
+
+        // Do the actual showing and hiding
+        $('.toggleform').hide();
+        $('.'+enable).show();
+
+        // Set 'selected' class on the link's parent
+        $('.logintoggle li').removeClass('selected');
+        clickedLink.parent().addClass('selected');
+    });
+});
+
+</script>
+
 <div id="authform">
 
 <p id="tagline">
@@ -9,6 +28,15 @@
     <small>It's way more black-and-white
     than all competitors.</small>
 </p>
+
+<div class="logintoggle">
+<ul>
+    <li class="selected"><a href="#" data-enable="loginform">Login</a></li>
+    <li><a href="#" data-enable="registerform">Register</a></li>
+</ul>
+</div>
+
+<div class="toggleform loginform">
 
 {% if form.errors %}
 <p>Your username and password didn't match. Please try again.</p>
@@ -47,6 +75,36 @@
 
 <input type="hidden" name="next" value="{{ next }}" />
 </form>
+
+</div>
+
+<div class="toggleform registerform">
+<form method="post" action="{% url 'signup' %}">
+{% csrf_token %}
+<table>
+<tr>
+    <td>Username:</td>
+    <td>{{ form.username }}</td>
+</tr>
+<tr class="password">
+    <td><label for="id_password1">Password:</label></td>
+    <td><input type="password" name="password1" required id="id_password1" /></td>
+</tr>
+<tr>
+    <td><label for="id_password2">Repeat:</label></td>
+    <td><input type="password" name="password2" required id="id_password2" /></td>
+</tr>
+<tr>
+    <td></td>
+    <td>
+        <input type="submit" value="Register" /><br />
+    </td>
+</tr>
+</table>
+
+<input type="hidden" name="next" value="{{ next }}" />
+</form>
+</div>
 
 {# Assumes you setup the password_reset view in your URLconf #}
 <p></p>

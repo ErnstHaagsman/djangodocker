@@ -1,4 +1,6 @@
 from django.contrib.auth.decorators import login_required
+from django.contrib.auth.forms import UserCreationForm
+from django.contrib.auth.models import UserManager, User
 from django.http import HttpResponseRedirect, JsonResponse
 from django.shortcuts import render, get_object_or_404
 
@@ -37,3 +39,12 @@ def toggle_todo(request, todo_id):
         'id': todo.id,
         'done': todo.done
     })
+
+def signup(request):
+    if request.method == 'POST':
+        form = UserCreationForm(request.POST)
+        if form.is_valid():
+            User.objects.create_user(
+                username=form.cleaned_data['username'],
+                password=form.cleaned_data['password1'])
+            return HttpResponseRedirect('/')

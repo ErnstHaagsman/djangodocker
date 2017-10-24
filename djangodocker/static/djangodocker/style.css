@@ -71,7 +71,7 @@ body {
 }
 
 #authform {
-    width: 600px;
+    width: 330px;
     padding: 20px;
 }
 
@@ -81,4 +81,53 @@ body {
 
 #tagline {
     margin-bottom: 2em;
+}
+
+.toggleform {
+    border: 1px solid black;
+    padding-top: 1em;
+    padding-left: 1em;
+    padding-bottom: 1em;
+}
+
+.logintoggle {
+    overflow: hidden;
+}
+
+.logintoggle ul {
+    margin-top: 0px;
+    list-style: none;
+    padding-left: 0px;
+}
+
+.logintoggle li {
+    float: left;
+    padding-left: 1em;
+    padding-right: 1em;
+    padding-bottom: 0.5em;
+    padding-top: 0.5em;
+}
+
+.logintoggle li.selected {
+    background-color: black;
+}
+
+.logintoggle li.selected a {
+    color: white;
+}
+
+.logintoggle a {
+    color: black;
+}
+
+.registerform {
+    display: none;
+}
+
+tr.password td {
+    padding-top: 0.7em;
+}
+
+#authform input[type=submit] {
+    margin-top: 0.7em;
 }
