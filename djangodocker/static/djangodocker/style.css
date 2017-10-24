@@ -69,3 +69,16 @@ body {
 .userinfo li:first-of-type::before{
     content: '';
 }
+
+#authform {
+    width: 600px;
+    padding: 20px;
+}
+
+#authform input[type=submit] {
+    font-size: 1.2em;
+}
+
+#tagline {
+    margin-bottom: 2em;
+}
