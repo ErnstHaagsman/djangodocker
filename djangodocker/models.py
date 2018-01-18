@@ -31,6 +31,9 @@ class TodoUserManager(BaseUserManager):
         extra_fields.setdefault('is_staff', True)
         extra_fields.setdefault('is_superuser', True)
 
+        # Superusers shouldn't need to verify their email address
+        extra_fields['is_confirmed'] = True
+
         if extra_fields.get('is_staff') is not True:
             raise ValueError('Superuser must have is_staff=True.')
         if extra_fields.get('is_superuser') is not True:
