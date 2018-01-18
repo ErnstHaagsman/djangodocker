@@ -29,6 +29,10 @@ ALLOWED_HOSTS = ['*']
 
 AUTH_USER_MODEL = 'djangodocker.TodoUser'
 
+EMAIL_HOST = os.environ['EMAIL_HOST']
+EMAIL_PORT = os.environ['EMAIL_PORT']
+
+URL = os.environ['URL']
 
 # Application definition
 

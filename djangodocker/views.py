@@ -1,8 +1,11 @@
+from django.conf import settings
 from django.contrib.auth import login, get_user_model
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth.models import User
+from django.core.mail import EmailMessage
 from django.http import HttpResponseRedirect, JsonResponse
 from django.shortcuts import render, get_object_or_404
+from django.template.loader import render_to_string
 
 from djangodocker.forms import TaskForm, TodoUserCreationForm
 from djangodocker.settings import AUTH_USER_MODEL
@@ -52,10 +55,23 @@ def signup(request):
                 display_name=form.cleaned_data['display_name']
             )
 
-            context = {
+            email_context = {
+                'url': settings.URL,
+                'user': new_user
+            }
+
+            message = EmailMessage(
+                'Thank you for registering for Todo',
+                render_to_string('djangodocker/confirm_email.txt', email_context),
+                'noreply@todo.ernsthaagsman.com',
+                [new_user.email]
+            )
+            message.send()
+
+            thanks_page_context = {
                 'email': new_user.email
             }
 
             return render(request,
                           'djangodocker/registration_thanks.html',
-                          context)
+                          thanks_page_context)

@@ -8,6 +8,11 @@ services:
      - .:/app
     links:
      - db
+     - maildev
+    environment:
+      EMAIL_HOST: maildev
+      EMAIL_PORT: 25
+      URL: http://192.168.99.100:8000
 
   db:
     image: "postgres:9.6"
@@ -15,3 +20,8 @@ services:
       - "5432:5432"
     environment:
       POSTGRES_PASSWORD: hunter2
+
+  maildev:
+    image: "djfarrelly/maildev:latest"
+    ports:
+      - "1080:80"
