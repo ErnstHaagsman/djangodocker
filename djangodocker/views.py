@@ -1,11 +1,11 @@
-from django.contrib.auth import login
+from django.contrib.auth import login, get_user_model
 from django.contrib.auth.decorators import login_required
-from django.contrib.auth.forms import UserCreationForm
 from django.contrib.auth.models import User
 from django.http import HttpResponseRedirect, JsonResponse
 from django.shortcuts import render, get_object_or_404
 
-from djangodocker.forms import TaskForm
+from djangodocker.forms import TaskForm, TodoUserCreationForm
+from djangodocker.settings import AUTH_USER_MODEL
 from .models import Todo
 
 
@@ -41,13 +41,16 @@ def toggle_todo(request, todo_id):
         'done': todo.done
     })
 
+
 def signup(request):
     if request.method == 'POST':
-        form = UserCreationForm(request.POST)
+        form = TodoUserCreationForm(request.POST)
         if form.is_valid():
-            new_user = User.objects.create_user(
-                username=form.cleaned_data['username'],
-                password=form.cleaned_data['password1'])
+            new_user = get_user_model().objects.create_user(
+                email=form.cleaned_data['email'],
+                password=form.cleaned_data['password1'],
+                display_name=form.cleaned_data['display_name']
+            )
 
             login(request, new_user)
             return HttpResponseRedirect('/')

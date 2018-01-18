@@ -83,8 +83,12 @@ $(function(){
 {% csrf_token %}
 <table>
 <tr>
-    <td>Username:</td>
-    <td>{{ form.username }}</td>
+    <td><label for="email">Email:</label></td>
+    <td><input type="email" name="email" required id="email" /></td>
+</tr>
+<tr>
+    <td><label for="display_name">Your Name:</label></td>
+    <td><input type="text" name="display_name" required id="display_name" /></td>
 </tr>
 <tr class="password">
     <td><label for="id_password1">Password:</label></td>

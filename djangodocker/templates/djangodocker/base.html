@@ -16,7 +16,7 @@
 
     {% if user.is_authenticated %} 
     <ul class="userinfo">
-        <li>{{ user.username }}</li>
+        <li>{{ user.get_short_name }}</li>
         {% if user.is_staff %}
             <li><a href="{% url 'admin:index' %}">admin</a></li>
         {% endif %}
