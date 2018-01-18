@@ -52,5 +52,10 @@ def signup(request):
                 display_name=form.cleaned_data['display_name']
             )
 
-            login(request, new_user)
-            return HttpResponseRedirect('/')
+            context = {
+                'email': new_user.email
+            }
+
+            return render(request,
+                          'djangodocker/registration_thanks.html',
+                          context)
