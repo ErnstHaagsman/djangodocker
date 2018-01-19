@@ -4,6 +4,7 @@ from django.contrib.auth import password_validation
 from djangodocker.models import TodoUser
 from django.utils.translation import gettext, gettext_lazy as _
 
+
 class TaskForm(forms.Form):
     todo_text = forms.CharField(label='Add Task', label_suffix='', max_length=400)
 

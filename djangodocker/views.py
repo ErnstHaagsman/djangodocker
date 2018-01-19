@@ -1,16 +1,14 @@
 from django.conf import settings
 from django.contrib.auth import login, get_user_model
 from django.contrib.auth.decorators import login_required
-from django.contrib.auth.models import User
 from django.core.exceptions import PermissionDenied
-from django.core.mail import EmailMessage, EmailMultiAlternatives
-from django.http import HttpResponseRedirect, JsonResponse, HttpResponseForbidden
+from django.core.mail import EmailMultiAlternatives
+from django.http import HttpResponseRedirect, JsonResponse
 from django.shortcuts import render, get_object_or_404
 from django.template.loader import render_to_string
 from django.urls import reverse
 
 from djangodocker.forms import TaskForm, TodoUserCreationForm
-from djangodocker.settings import AUTH_USER_MODEL
 from .models import Todo
 
 
