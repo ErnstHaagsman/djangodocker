@@ -21,6 +21,98 @@ $(function(){
 
 </script>
 
+<style>
+#authform {
+    width: 330px;
+    padding: 20px;
+}
+
+#authform input[type=submit] {
+    font-size: 1.2em;
+}
+
+#tagline {
+    margin-bottom: 2em;
+}
+
+.toggleform {
+    border: 1px solid black;
+    padding-top: 1em;
+    padding-left: 1em;
+    padding-bottom: 1em;
+}
+
+.logintoggle {
+    overflow: hidden;
+}
+
+.logintoggle ul {
+    margin-top: 0px;
+    list-style: none;
+    padding-left: 0px;
+}
+
+.logintoggle li {
+    float: left;
+    padding-left: 1em;
+    padding-right: 1em;
+    padding-bottom: 0.5em;
+    padding-top: 0.5em;
+}
+
+.logintoggle li.selected {
+    background-color: black;
+}
+
+.logintoggle li.selected a {
+    color: white;
+}
+
+.logintoggle a {
+    color: black;
+}
+
+{% if not signupform.is_bound %}
+
+.signupform {
+    display: none;
+}
+
+{% else %}
+
+.loginform {
+    display: none;
+}
+
+{% endif %}
+
+tr.password td {
+    padding-top: 0.7em;
+}
+
+#authform input[type=submit] {
+    margin-top: 0.7em;
+}
+
+.signupform tr td:first-child{
+    min-width: 100px;
+    vertical-align: top;
+}
+
+.errorlist {
+    padding-left: 0;
+    margin-top: 0.5em;
+    margin-bottom: 0;
+    font-size: small;
+    color: red;
+}
+
+.errorlist li {
+    list-style-type: none;
+}
+
+</style>
+
 <div id="authform">
 
 <p id="tagline">
@@ -31,11 +123,11 @@ $(function(){
 
 <div class="logintoggle">
 <ul>
-    <li class="selected">
+    <li {% if not signupform.is_bound %} class="selected" {% endif %}>
         <a href="#" data-enable="loginform">Login</a>
     </li>
-    <li>
-        <a href="#" data-enable="registerform">Register</a>
+    <li {% if signupform.is_bound %} class="selected" {% endif %}>
+        <a href="#" data-enable="signupform">Register</a>
     </li>
 </ul>
 </div>
@@ -85,7 +177,7 @@ $(function(){
 
 </div>
 
-<div class="toggleform registerform">
+<div class="toggleform signupform">
 <form method="post" action="{% url 'login' %}">
 {% csrf_token %}
 <table>

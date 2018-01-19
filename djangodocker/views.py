@@ -61,7 +61,7 @@ class Login(LoginView):
         if form and isinstance(form, ConfirmedEmailAuthenticationForm):
             loginform = form
         else:
-            loginform = self.get_form()
+            loginform = ConfirmedEmailAuthenticationForm()
 
         if form and isinstance(form, TodoUserCreationForm):
             signupform = form
