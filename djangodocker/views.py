@@ -1,14 +1,15 @@
 from django.conf import settings
 from django.contrib.auth import login, get_user_model
 from django.contrib.auth.decorators import login_required
-from django.core.exceptions import PermissionDenied
+from django.contrib.auth.views import LoginView
+from django.core.exceptions import PermissionDenied, SuspiciousOperation
 from django.core.mail import EmailMultiAlternatives
 from django.http import HttpResponseRedirect, JsonResponse
 from django.shortcuts import render, get_object_or_404
 from django.template.loader import render_to_string
 from django.urls import reverse
 
-from djangodocker.forms import TaskForm, TodoUserCreationForm
+from djangodocker.forms import TaskForm, TodoUserCreationForm, ConfirmedEmailAuthenticationForm
 from .models import Todo
 
 
@@ -45,40 +46,83 @@ def toggle_todo(request, todo_id):
     })
 
 
-def signup(request):
-    if request.method == 'POST':
-        form = TodoUserCreationForm(request.POST)
-        if form.is_valid():
-            new_user = get_user_model().objects.create_user(
-                email=form.cleaned_data['email'],
-                password=form.cleaned_data['password1'],
-                display_name=form.cleaned_data['display_name']
-            )
+class Login(LoginView):
+    """
+    A combined login and signup form
+    """
 
-            email_context = {
-                'url': settings.URL,
-                'user': new_user
-            }
+    authentication_form = ConfirmedEmailAuthenticationForm
 
-            message = EmailMultiAlternatives(
-                'Thank you for registering for Todo',
-                render_to_string('djangodocker/confirm_email.txt', email_context),
-                'noreply@todo.ernsthaagsman.com',
-                [new_user.email]
-            )
-            message.attach_alternative(
-                render_to_string('djangodocker/confirm_email.html', email_context),
-                'text/html'
-            )
-            message.send()
+    def get_context_data(self, **kwargs):
+        form = None
+        if 'form' in kwargs:
+            form = kwargs['form']
 
-            thanks_page_context = {
-                'email': new_user.email
-            }
+        if form and isinstance(form, ConfirmedEmailAuthenticationForm):
+            loginform = form
+        else:
+            loginform = self.get_form()
 
-            return render(request,
-                          'djangodocker/registration_thanks.html',
-                          thanks_page_context)
+        if form and isinstance(form, TodoUserCreationForm):
+            signupform = form
+        else:
+            signupform = TodoUserCreationForm()
+
+        return {
+            'loginform': loginform,
+            'signupform': signupform
+        }
+
+    def post(self, request, *args, **kwargs):
+        """
+        Handle POST requests: instantiate a form instance with the passed
+        POST variables and then check if it's valid.
+        """
+        if request.POST['form'] == 'loginform':
+            form = self.get_form()
+            if form.is_valid():
+                return self.form_valid(form)
+        elif request.POST['form'] == 'signupform':
+            form = TodoUserCreationForm(request.POST)
+            if form.is_valid():
+                return self.register_user(request, form)
+        else:
+            raise SuspiciousOperation('Invalid form')
+
+        if not form.is_valid():
+            return self.form_invalid(form)
+
+    def register_user(self, request, form):
+        new_user = get_user_model().objects.create_user(
+            email=form.cleaned_data['email'],
+            password=form.cleaned_data['password1'],
+            display_name=form.cleaned_data['display_name']
+        )
+
+        email_context = {
+            'url': settings.URL,
+            'user': new_user
+        }
+
+        message = EmailMultiAlternatives(
+            'Thank you for registering for Todo',
+            render_to_string('djangodocker/confirm_email.txt', email_context),
+            'noreply@todo.ernsthaagsman.com',
+            [new_user.email]
+        )
+        message.attach_alternative(
+            render_to_string('djangodocker/confirm_email.html', email_context),
+            'text/html'
+        )
+        message.send()
+
+        thanks_page_context = {
+            'email': new_user.email
+        }
+
+        return render(request,
+                      'djangodocker/registration_thanks.html',
+                      thanks_page_context)
 
 
 def confirm(request, confirmation_code):

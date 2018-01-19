@@ -1,5 +1,6 @@
 from django import forms
 from django.contrib.auth import password_validation
+from django.contrib.auth.forms import AuthenticationForm
 
 from djangodocker.models import TodoUser
 from django.utils.translation import gettext, gettext_lazy as _
@@ -24,7 +25,7 @@ class TodoUserCreationForm(forms.ModelForm):
         help_text=password_validation.password_validators_help_text_html(),
     )
     password2 = forms.CharField(
-        label=_("Password confirmation"),
+        label=_("Confirm"),
         widget=forms.PasswordInput,
         strip=False,
         help_text=_("Enter the same password as before, for verification."),
@@ -66,3 +67,17 @@ class TodoUserCreationForm(forms.ModelForm):
         if commit:
             user.save()
         return user
+
+
+class ConfirmedEmailAuthenticationForm(AuthenticationForm):
+    def confirm_login_allowed(self, user):
+        if not user.is_active:
+            raise forms.ValidationError(
+                _("This account is inactive."),
+                code='inactive',
+            )
+        if not user.is_confirmed:
+            raise forms.ValidationError(
+                _("Please confirm your email address first."),
+                code='not_confirmed',
+            )

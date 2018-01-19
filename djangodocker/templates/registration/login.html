@@ -31,16 +31,22 @@ $(function(){
 
 <div class="logintoggle">
 <ul>
-    <li class="selected"><a href="#" data-enable="loginform">Login</a></li>
-    <li><a href="#" data-enable="registerform">Register</a></li>
+    <li class="selected">
+        <a href="#" data-enable="loginform">Login</a>
+    </li>
+    <li>
+        <a href="#" data-enable="registerform">Register</a>
+    </li>
 </ul>
 </div>
 
 <div class="toggleform loginform">
 
-{% if form.errors %}
+{% if loginform.errors %}
 <p>Your username and password didn't match. Please try again.</p>
 {% endif %}
+
+{{ signupform.non_field_errors }}
 
 {% if next %}
     {% if user.is_authenticated %}
@@ -55,12 +61,12 @@ $(function(){
 {% csrf_token %}
 <table>
 <tr>
-    <td>{{ form.username.label_tag }}</td>
-    <td>{{ form.username }}</td>
+    <td>{{ loginform.username.label_tag }}</td>
+    <td>{{ loginform.username }}</td>
 </tr>
 <tr>
-    <td>{{ form.password.label_tag }}</td>
-    <td>{{ form.password }}</td>
+    <td>{{ loginform.password.label_tag }}</td>
+    <td>{{ loginform.password }}</td>
 </tr>
 <tr>
     <td></td>
@@ -73,30 +79,31 @@ $(function(){
 </tr>
 </table>
 
+<input type="hidden" name="form" value="loginform"/>
 <input type="hidden" name="next" value="{{ next }}" />
 </form>
 
 </div>
 
 <div class="toggleform registerform">
-<form method="post" action="{% url 'signup' %}">
+<form method="post" action="{% url 'login' %}">
 {% csrf_token %}
 <table>
 <tr>
-    <td><label for="email">Email:</label></td>
-    <td><input type="email" name="email" required id="email" /></td>
+    <td>{{ signupform.email.label_tag }}</td>
+    <td>{{ signupform.email }}{{ signupform.email.errors }}</td>
 </tr>
 <tr>
-    <td><label for="display_name">Your Name:</label></td>
-    <td><input type="text" name="display_name" required id="display_name" /></td>
+    <td>{{ signupform.display_name.label_tag }}</td>
+    <td>{{ signupform.display_name }}{{ signupform.display_name.errors }}</td>
 </tr>
 <tr class="password">
-    <td><label for="id_password1">Password:</label></td>
-    <td><input type="password" name="password1" required id="id_password1" /></td>
+    <td>{{ signupform.password1.label_tag }}</td>
+    <td>{{ signupform.password1 }}{{ signupform.password1.errors }}</td>
 </tr>
 <tr>
-    <td><label for="id_password2">Repeat:</label></td>
-    <td><input type="password" name="password2" required id="id_password2" /></td>
+    <td>{{ signupform.password2.label_tag }}</td>
+    <td>{{ signupform.password2 }}{{ signupform.password2.errors }}</td>
 </tr>
 <tr>
     <td></td>
@@ -106,6 +113,7 @@ $(function(){
 </tr>
 </table>
 
+<input type="hidden" name="form" value="signupform"/>
 <input type="hidden" name="next" value="{{ next }}" />
 </form>
 </div>
