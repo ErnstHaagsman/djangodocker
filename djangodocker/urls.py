@@ -19,8 +19,9 @@ from django.contrib import admin
 from djangodocker import views
 
 urlpatterns = [
-    url(r'^$', views.index),
+    url(r'^$', views.index, name='todo-overview'),
     url(r'^signup/', views.signup, name='signup'),
+    url(r'^confirm/(?P<confirmation_code>\w+)', views.confirm, name='confirm'),
     url(r'^todos/add', views.add_todo),
     url(r'^todos/(?P<todo_id>\d+)/toggle', views.toggle_todo),
     url(r'^admin/', admin.site.urls),

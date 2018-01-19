@@ -1,0 +1,11 @@
+{% extends 'djangodocker/base.html' %}
+
+{% block content %}
+
+    <h1>Welcome, {{ user.get_short_name }}</h1>
+
+    <p>Thank you for registering with Todos</p>
+
+    <p><a href="{% url 'todo-overview' %}">Get started!</a></p>
+
+{% endblock %}

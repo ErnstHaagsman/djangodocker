@@ -1,0 +1,7 @@
+<h1>Todo</h1>
+
+<b>Dear {{ user.get_short_name }},</b>
+<p>Thank you very much for registering for Todo!</p>
+<p>Complete you registration, by
+    <a href="{{ url }}{% url 'confirm' user.confirmation_code %}">
+        confirming your email address</a></p>

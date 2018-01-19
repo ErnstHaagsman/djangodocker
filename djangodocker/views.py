@@ -2,10 +2,12 @@ from django.conf import settings
 from django.contrib.auth import login, get_user_model
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth.models import User
-from django.core.mail import EmailMessage
-from django.http import HttpResponseRedirect, JsonResponse
+from django.core.exceptions import PermissionDenied
+from django.core.mail import EmailMessage, EmailMultiAlternatives
+from django.http import HttpResponseRedirect, JsonResponse, HttpResponseForbidden
 from django.shortcuts import render, get_object_or_404
 from django.template.loader import render_to_string
+from django.urls import reverse
 
 from djangodocker.forms import TaskForm, TodoUserCreationForm
 from djangodocker.settings import AUTH_USER_MODEL
@@ -60,11 +62,15 @@ def signup(request):
                 'user': new_user
             }
 
-            message = EmailMessage(
+            message = EmailMultiAlternatives(
                 'Thank you for registering for Todo',
                 render_to_string('djangodocker/confirm_email.txt', email_context),
                 'noreply@todo.ernsthaagsman.com',
                 [new_user.email]
+            )
+            message.attach_alternative(
+                render_to_string('djangodocker/confirm_email.html', email_context),
+                'text/html'
             )
             message.send()
 
@@ -75,3 +81,22 @@ def signup(request):
             return render(request,
                           'djangodocker/registration_thanks.html',
                           thanks_page_context)
+
+
+def confirm(request, confirmation_code):
+    try:
+        user = get_user_model().objects.get(confirmation_code=confirmation_code)
+    except get_user_model().DoesNotExist:
+        raise PermissionDenied()
+
+    if user.is_confirmed:
+        return HttpResponseRedirect(reverse('login'))
+
+    user.is_confirmed = True
+    user.save()
+
+    login(request, user)
+
+    return render (request,
+                   'registration/confirm.html',
+                   {})

@@ -4,7 +4,7 @@ Thank you very much for registering for Todo!
 Complete your registration by copy-pasting the following link into the
 address bar of your browser:
 
-{{ url }}/confirm/{{ user.confirmation_code }}
+{{ url }}{% url 'confirm' user.confirmation_code %}
 
 Thank you very much!
 The Todo team
