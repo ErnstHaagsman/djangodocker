@@ -102,9 +102,13 @@ tr.password td {
 .errorlist {
     padding-left: 0;
     margin-top: 0.5em;
-    margin-bottom: 0;
-    font-size: small;
+    margin-bottom: 1.25em;
     color: red;
+}
+
+td .errorlist{
+    font-size: small;
+    margin-bottom: 0.5em;
 }
 
 .errorlist li {
@@ -134,10 +138,7 @@ tr.password td {
 
 <div class="toggleform loginform">
 
-{% if loginform.errors %}
-<p>Your username and password didn't match. Please try again.</p>
-{% endif %}
-
+{{ loginform.non_field_errors }}
 {{ signupform.non_field_errors }}
 
 {% if next %}
