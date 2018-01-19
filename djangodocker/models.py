@@ -65,7 +65,8 @@ class TodoUser(AbstractBaseUser, PermissionsMixin):
         max_length=50,
         help_text='The random-generated code sent to the user for email'
                   'verification',
-        default=get_random_string(50)
+        default=get_random_string(50),
+        unique=True
     )
     email = models.EmailField(
         unique=True,
