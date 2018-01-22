@@ -8,7 +8,6 @@ services:
      - .:/app
     links:
      - db
-     - maildev
      - queue
     env_file:
       - debug.env
@@ -17,6 +16,8 @@ services:
     build: .
     links:
       - queue
+      - maildev
+      - db
     volumes:
      - .:/app
     command: "python -u -m celery -A djangodocker worker -l info"
