@@ -1,16 +1,14 @@
-from django.conf import settings
 from django.contrib.auth import login, get_user_model
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth.views import LoginView
 from django.core.exceptions import PermissionDenied, SuspiciousOperation
-from django.core.mail import EmailMultiAlternatives
 from django.http import HttpResponseRedirect, JsonResponse
 from django.shortcuts import render, get_object_or_404
-from django.template.loader import render_to_string
 from django.urls import reverse
 
 from djangodocker.forms import TaskForm, TodoUserCreationForm, ConfirmedEmailAuthenticationForm
 from .models import Todo
+from .tasks import send_confirmation_email
 
 
 @login_required
@@ -99,22 +97,7 @@ class Login(LoginView):
             display_name=form.cleaned_data['display_name']
         )
 
-        email_context = {
-            'url': settings.URL,
-            'user': new_user
-        }
-
-        message = EmailMultiAlternatives(
-            'Thank you for registering for Todo',
-            render_to_string('djangodocker/confirm_email.txt', email_context),
-            'noreply@todo.ernsthaagsman.com',
-            [new_user.email]
-        )
-        message.attach_alternative(
-            render_to_string('djangodocker/confirm_email.html', email_context),
-            'text/html'
-        )
-        message.send()
+        send_confirmation_email.delay(new_user.email)
 
         thanks_page_context = {
             'email': new_user.email

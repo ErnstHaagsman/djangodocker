@@ -9,10 +9,19 @@ services:
     links:
      - db
      - maildev
-    environment:
-      EMAIL_HOST: maildev
-      EMAIL_PORT: 25
-      URL: http://192.168.99.100:8000
+     - queue
+    env_file:
+      - debug.env
+
+  celery:
+    build: .
+    links:
+      - queue
+    volumes:
+     - .:/app
+    command: "python -u -m celery -A djangodocker worker -l info"
+    env_file:
+      - debug.env
 
   db:
     image: "postgres:9.6"
@@ -31,3 +40,9 @@ services:
       --incoming-pass hunter2
     ports:
       - "1080:80"
+
+  queue:
+    image: "rabbitmq:3.7-management"
+    hostname: "queue"
+    ports:
+      - "15672:15672"

@@ -36,6 +36,8 @@ EMAIL_HOST_PASSWORD = os.environ['EMAIL_HOST_PASSWORD']
 
 URL = os.environ['URL']
 
+CELERY_BROKER_URL = os.environ['CELERY_BROKER_URL']
+
 # Application definition
 
 INSTALLED_APPS = [
