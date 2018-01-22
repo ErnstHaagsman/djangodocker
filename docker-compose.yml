@@ -23,5 +23,11 @@ services:
 
   maildev:
     image: "djfarrelly/maildev:latest"
+    command: >
+      bin/maildev
+      --web 80
+      --smtp 25
+      --incoming-user smtp@example.com
+      --incoming-pass hunter2
     ports:
       - "1080:80"
