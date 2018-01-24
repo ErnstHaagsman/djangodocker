@@ -3,3 +3,4 @@ pytz==2017.2
 psycopg2==2.7.1
 celery==4.1.0
 Gunicorn==19.7.1
+requests==2.18.4
