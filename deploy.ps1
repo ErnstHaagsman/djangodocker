@@ -1,6 +1,4 @@
-$worktree_clean = git diff-index --quiet HEAD --
-
-if ($worktree_clean -ne 0) {
+if (git status --porcelain) {
     Write-Host Worktree not clean, commit all changes before deploying
     Exit 1
 }
