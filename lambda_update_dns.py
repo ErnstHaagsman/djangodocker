@@ -118,19 +118,18 @@ def update_zone(dns_name: str, resource_records: Set[str]):
     changes = {
         'ResourceRecordSet': {
             'Name': dns_name,
-            'Type': RECORD_TYPE
+            'Type': RECORD_TYPE,
+            'TTL': TTL
         }
     }
 
     if resource_records:
         # We have records
         changes['Action'] = 'UPSERT'
-        changes['ResourceRecordSet']['TTL'] = TTL
     else:
-        changes['Action'] = 'DELETE'
-
         # Amazon wants us to specify what the records used to be in this case
         resource_records = get_resource_records(dns_name)
+        changes['Action'] = 'DELETE'
 
     records = [{'Value': r} for r in resource_records]
     changes['ResourceRecordSet']['ResourceRecords'] = records
