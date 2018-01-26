@@ -1,7 +1,7 @@
-from typing import List
+from functools import lru_cache
+from typing import List, Set
 
 import boto3
-import io
 import json
 
 # Configuration
@@ -27,9 +27,42 @@ class ContainerStatus:
     PENDING = 'PENDING'
 
 
-def get_containers(event_json: dict) -> List[Container]:
+def get_task_ids(family: str) -> List[str]:
+    client = boto3.client('ecs')
+    tasks = client.list_tasks(
+        cluster=CLUSTER_NAME,
+        family=family
+    )
+
+    # Insurance in case someone uses this script for very large clusters
+    if 'nextToken' in tasks:
+        raise Exception(f"{family} has more than 100 tasks, please change "
+                        "the script to be able to handle nextToken.")
+
+    return tasks['taskArns']
+
+
+def get_task_descriptions(task_ids: List[str]):
+    if not task_ids:
+        return []
+
+    client = boto3.client('ecs')
+    tasks = client.describe_tasks(
+        cluster=CLUSTER_NAME,
+        tasks=task_ids
+    )
+
+    if tasks['failures']:
+        print('Failures encountered while getting task descriptions:')
+        print(json.dumps(tasks['failures'], indent=4))
+        print('***************')
+
+    return tasks['tasks']
+
+
+def get_containers(task: dict) -> List[Container]:
     containers = []
-    for container_json in event_json['detail']['containers']:
+    for container_json in task['containers']:
         containers.append(Container(
             container_json['containerArn'],
             container_json['lastStatus'],
@@ -58,6 +91,7 @@ def get_ec2_instance_ip(ec2_instance_id: str) -> str:
     return instance.private_ip_address
 
 
+@lru_cache(maxsize=128)
 def get_ecs_instance_ip(cluster_arn: str, ecs_instance_arn: str) -> str:
     return get_ec2_instance_ip(get_ec2_id(cluster_arn, ecs_instance_arn))
 
@@ -80,24 +114,26 @@ def get_resource_records(dns_name: str) -> List[str]:
     return [record['Value'] for record in resource_records]
 
 
-def update_zone(dns_name: str, resource_records: List[str]):
+def update_zone(dns_name: str, resource_records: Set[str]):
     changes = {
         'ResourceRecordSet': {
-            'Name': dns_name
+            'Name': dns_name,
+            'Type': RECORD_TYPE
         }
     }
 
     if resource_records:
         # We have records
         changes['Action'] = 'UPSERT'
-        changes['ResourceRecordSet']['Type'] = RECORD_TYPE
         changes['ResourceRecordSet']['TTL'] = TTL
-        # changes['ResourceRecordSet']['MultiValueAnswer'] = \
-        #     len(resource_records) > 1
-        records = [{'Value': r} for r in resource_records]
-        changes['ResourceRecordSet']['ResourceRecords'] = records
     else:
         changes['Action'] = 'DELETE'
+
+        # Amazon wants us to specify what the records used to be in this case
+        resource_records = get_resource_records(dns_name)
+
+    records = [{'Value': r} for r in resource_records]
+    changes['ResourceRecordSet']['ResourceRecords'] = records
 
     r53_client = boto3.client('route53')
     r53_client.change_resource_record_sets(
@@ -125,30 +161,52 @@ def lambda_handler(event, context):
     if cluster_name != CLUSTER_NAME:
         raise ValueError(f"Cluster not configured: {cluster_name}")
 
-    container_list = get_containers(event)
-    host_ip = get_ecs_instance_ip(cluster_arn=cluster_arn,
-                                  ecs_instance_arn=event['detail']['containerInstanceArn'])
+    # Refresh the DNS record for the task that was just changed
+    # First, get all tasks for the family of the changed task
+    task_def_arn = event['detail']['taskDefinitionArn']
 
-    for container in container_list:
-        # FQDN with trailing dot
+    # The ARN is formatted as:
+    # arn:aws:ecs:region:account:taskdefinition/family:revision
+    task_revision = task_def_arn.split('/')[1]
+    task_family = task_revision.split(':')[0]
+
+    # Get the task objects for all active tasks for this definition
+    task_ids = get_task_ids(family=task_family)
+    tasks = get_task_descriptions(task_ids)
+
+    container_ips = {}
+
+    # First get the names of any containers listed in the event, in case
+    # they were stopped, and we didn't find active tasks. They should still
+    # be removed from DNS
+    for container in get_containers(event['detail']):
         dns_name = container.name + '.' + DNS_ZONE + '.'
-        current_hosts = get_resource_records(dns_name)
+        if dns_name not in container_ips:
+            container_ips[dns_name] = set()
 
-        if container.last_status == ContainerStatus.RUNNING:
-            if host_ip in current_hosts:
-                print(f'{dns_name} RUNNING and already in zone.')
-            else:
-                current_hosts.append(host_ip)
-                print(f'{dns_name} RUNNING and not in zone yet, adding...')
-                update_zone(dns_name, current_hosts)
-        elif container.last_status == ContainerStatus.STOPPED:
-            if host_ip in current_hosts:
-                print(f'{dns_name} STOPPED and in zone, removing...')
-                current_hosts.remove(host_ip)
-                update_zone(dns_name, current_hosts)
-            else:
-                print(f'{dns_name} STOPPED and not in zone.')
-        elif container.last_status == ContainerStatus.PENDING:
-            print(f'{dns_name} PENDING, not doing anything.')
-        else:
-            raise ValueError(f'Container status unknown: {container.last_status}')
+    # Now iterate through the found tasks, and build a mapping of name to IP
+    # addresses
+    for task in tasks:
+        if task['clusterArn'] != cluster_arn:
+            continue
+
+        container_list = get_containers(task)
+        host_ip = get_ecs_instance_ip(cluster_arn=cluster_arn,
+                                      ecs_instance_arn=task['containerInstanceArn'])
+
+        for container in container_list:
+            dns_name = container.name + '.' + DNS_ZONE + '.'
+
+            if dns_name not in container_ips:
+                container_ips[dns_name] = set()
+
+            # Only check for RUNNING after adding the DNS name to the dict,
+            # to make sure that any service with no active containers will
+            # get its DNS records removed
+            if container.last_status == ContainerStatus.RUNNING:
+                container_ips[dns_name].add(host_ip)
+
+    # Update DNS records for all containers
+    for dns_name in container_ips:
+        print(f'Updating {dns_name}, new IPs: {container_ips[dns_name]}')
+        update_zone(dns_name, container_ips[dns_name])
