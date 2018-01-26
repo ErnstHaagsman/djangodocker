@@ -24,6 +24,7 @@ class Container:
 class ContainerStatus:
     STOPPED = 'STOPPED'
     RUNNING = 'RUNNING'
+    PENDING = 'PENDING'
 
 
 def get_containers(event_json: dict) -> List[Container]:
@@ -147,5 +148,7 @@ def lambda_handler(event, context):
                 update_zone(dns_name, current_hosts)
             else:
                 print(f'{dns_name} STOPPED and not in zone.')
+        elif container.last_status == ContainerStatus.PENDING:
+            print(f'{dns_name} PENDING, not doing anything.')
         else:
             raise ValueError(f'Container status unknown: {container.last_status}')
