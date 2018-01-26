@@ -27,6 +27,10 @@ class ContainerStatus:
     PENDING = 'PENDING'
 
 
+class NoRecordsError(Exception):
+    pass
+
+
 def get_task_ids(family: str) -> List[str]:
     client = boto3.client('ecs')
     tasks = client.list_tasks(
@@ -97,6 +101,10 @@ def get_ecs_instance_ip(cluster_arn: str, ecs_instance_arn: str) -> str:
 
 
 def get_resource_records(dns_name: str) -> List[str]:
+    # Ensure FQDN
+    if dns_name[-1] != '.':
+        dns_name += '.'
+
     r53_client = boto3.client('route53')
     zone = r53_client.list_resource_record_sets(
         HostedZoneId=HOSTED_ZONE_ID,
@@ -106,11 +114,18 @@ def get_resource_records(dns_name: str) -> List[str]:
     )
 
     if not zone['ResourceRecordSets']:
-        return []
+        raise NoRecordsError()
 
     # Taking the 0th ResourceRecordSet, as the API supports returning more,
     # but we're only requesting one.
-    resource_records = zone['ResourceRecordSets'][0]['ResourceRecords']
+    sets = zone['ResourceRecordSets'][0]
+
+    # If route 53 returned a different record, the record we requested
+    # doesn't exist.
+    if sets['Name'] != dns_name:
+        raise NoRecordsError()
+
+    resource_records = sets['ResourceRecords']
     return [record['Value'] for record in resource_records]
 
 
@@ -127,9 +142,14 @@ def update_zone(dns_name: str, resource_records: Set[str]):
         # We have records
         changes['Action'] = 'UPSERT'
     else:
-        # Amazon wants us to specify what the records used to be in this case
-        resource_records = get_resource_records(dns_name)
-        changes['Action'] = 'DELETE'
+        try:
+            # Amazon wants us to specify what the records used to be in this case
+            resource_records = get_resource_records(dns_name)
+            changes['Action'] = 'DELETE'
+        except NoRecordsError:
+            # We want there to not be a record, and there isn't
+            # Job done.
+            return
 
     records = [{'Value': r} for r in resource_records]
     changes['ResourceRecordSet']['ResourceRecords'] = records
