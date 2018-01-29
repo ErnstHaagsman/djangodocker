@@ -2,6 +2,14 @@ version: '2'
 services:
   web:
     build: .
+    environment:
+      SECRET_KEY: "_(g#-==3_y-0fp(!dc_6=ukct@xeuz%k^1pdp8wc8ql3#4pjq"
+      HOST: '*'
+      DB_HOST: db
+      DB_NAME: postgres
+      DB_USER: postgres
+      DB_PASSWORD: hunter2
+      DEBUG: 1
     ports:
      - "8000:8000"
     volumes:

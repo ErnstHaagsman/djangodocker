@@ -20,12 +20,13 @@ BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 # See https://docs.djangoproject.com/en/1.11/howto/deployment/checklist/
 
 # SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = '_(g#-==3_y-0fp(!dc_6=ukct@xeuz%$k^1pdp8wc8ql3#4pjq'
+SECRET_KEY = os.environ['SECRET_KEY']
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = True
+_debug = os.environ.get('DEBUG', '0')
+DEBUG = _debug == '1'  # only switch on debug if the DEBUG env var is '1'
 
-ALLOWED_HOSTS = ['*']
+ALLOWED_HOSTS = [os.environ['HOST']]
 
 
 # Application definition
@@ -78,10 +79,10 @@ WSGI_APPLICATION = 'djangodocker.wsgi.application'
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.postgresql',
-        'NAME': 'postgres',
-        'USER': 'postgres',
-        'PASSWORD': 'hunter2',
-        'HOST': 'db'
+        'NAME': os.environ['DB_NAME'],
+        'USER': os.environ['DB_USER'],
+        'PASSWORD': os.environ['DB_PASSWORD'],
+        'HOST': os.environ['DB_HOST']
     }
 }
 
