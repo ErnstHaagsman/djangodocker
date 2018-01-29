@@ -2,3 +2,4 @@ Django==2.0.1
 pytz==2017.2
 psycopg2==2.7.1
 Gunicorn==19.7.1
+requests==2.18.4

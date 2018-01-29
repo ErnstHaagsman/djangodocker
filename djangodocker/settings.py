@@ -11,6 +11,11 @@ https://docs.djangoproject.com/en/1.11/ref/settings/
 """
 
 import os
+import logging
+import requests
+from requests.exceptions import ConnectionError
+
+logger = logging.getLogger(__name__)
 
 # Build paths inside the project like this: os.path.join(BASE_DIR, ...)
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
@@ -28,6 +33,19 @@ DEBUG = _debug == '1'  # only switch on debug if the DEBUG env var is '1'
 
 ALLOWED_HOSTS = [os.environ['HOST']]
 
+# We're taking the 'real' ALLOWED_HOST from the environment
+# Yet to make sure we're passing the ELB health check, we need to
+# Add the hosting EC2 instance's private IP here. If we're on AWS,
+# that is.
+
+# Use the Instance Metadata API to get our private IP
+# https://docs.aws.amazon.com/AWSEC2/latest/UserGuide/ec2-instance-metadata.html
+try:
+    r = requests.get('http://169.254.169.254/latest/meta-data/local-ipv4',
+                     timeout=0.5)
+    ALLOWED_HOSTS.append(r.text)
+except ConnectionError:
+    logger.warning("Could not obtain EC2 metadata")
 
 # Application definition
 
