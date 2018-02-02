@@ -35,7 +35,7 @@ COPY --chown=django:django . /app
 
 # Collect static files
 COPY nginx.conf /etc/nginx/nginx.conf
-RUN python3 -u manage.py collectstatic
+RUN python3 -u manage.py collectstatic --link
 
 # Now copy in our code, and run it
 COPY . /app
