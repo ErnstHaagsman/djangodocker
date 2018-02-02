@@ -2,28 +2,29 @@ FROM python:3.6-jessie
 
 WORKDIR /app
 
-ENV SECRET_KEY=INSECURE_PLACEHOLDER \
-    HOST='*' \
-    DB_HOST='PLACEHOLDER' \
-    DB_NAME='PLACEHOLDER' \
-    DB_USER='PLACEHOLDER' \
-    DB_PASSWORD='PLACEHOLDER'
-
 RUN apt-get update && apt-get install --no-install-recommends -y sudo nginx \
     && rm -rf /var/lib/apt/lists/*
+
+RUN groupadd django && useradd -g django django && \
+    echo "django ALL=(root) NOPASSWD: $(which nginx)" >> /etc/sudoers && \
+    mkdir -p /var/www/static && chown django:django /var/www/static && \
+    touch /tmp/nginx.pid && chown django:django /tmp/nginx.pid && \
+    mkdir -p /var/log/nginx && chown django:django /var/log/nginx && \
+    mkdir -p /var/lib/nginx && chown django:django /var/lib/nginx
 
 # By copying over requirements first, we make sure that Docker will cache
 # our installed requirements rather than reinstall them on every build
 COPY requirements.txt /app/requirements.txt
 RUN pip install -r requirements.txt
 
-RUN groupadd django && useradd -g django django
-RUN echo "django ALL=(root) NOPASSWD: $(which nginx)" >> /etc/sudoers
-RUN mkdir -p /var/www/static && chown django:django /var/www/static
-RUN touch /tmp/nginx.pid && chown django:django /tmp/nginx.pid
-RUN mkdir -p /var/log/nginx && chown django:django /var/log/nginx
-RUN mkdir -p /var/lib/nginx && chown django:django /var/lib/nginx
 USER django
+
+ENV SECRET_KEY=INSECURE_PLACEHOLDER \
+    HOST='*' \
+    DB_HOST='PLACEHOLDER' \
+    DB_NAME='PLACEHOLDER' \
+    DB_USER='PLACEHOLDER' \
+    DB_PASSWORD='PLACEHOLDER'
 
 # Now copy in our code, and run it
 COPY --chown=django:django . /app
