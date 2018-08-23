@@ -1,6 +1,6 @@
 Django==2.0.1
 pytz==2017.2
-psycopg2==2.7.3.2
+psycopg2~=2.7
 Gunicorn==19.7.1
 requests==2.18.4
-setuptools==38.4.0
+setuptools>=38.4.0
