@@ -23,13 +23,6 @@ RUN pip3 install -r requirements.txt
 
 USER django
 
-ENV SECRET_KEY=INSECURE_PLACEHOLDER \
-    HOST='*' \
-    DB_HOST='PLACEHOLDER' \
-    DB_NAME='PLACEHOLDER' \
-    DB_USER='PLACEHOLDER' \
-    DB_PASSWORD='PLACEHOLDER'
-
 # Now copy in our code, and run it
 COPY --chown=django:django . /app
 

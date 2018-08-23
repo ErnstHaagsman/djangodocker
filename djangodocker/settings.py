@@ -12,10 +12,48 @@ https://docs.djangoproject.com/en/1.11/ref/settings/
 
 import os
 import logging
+import sys
+from typing import Union, Iterable
+
 import requests
 from requests.exceptions import ConnectionError
 
 logger = logging.getLogger(__name__)
+
+def get_env_var(name, required=True, except_commands: Iterable[str]=None) \
+        -> Union[str, None]:
+    """
+    Gets an environment variable, raising an error if required. Will return a
+    None if not required, or if Django was started with one of the
+    'except_commands', collectstatic by default
+
+    :param name: The name of the environment variable
+    :param required: If the env var is undefined, should the function return
+                     None or raise an error?
+    :param except_commands: If Django is started with one of these commands,
+                     required variables that were not find in the environment
+                     will still not raise an error. Otherwise a placeholder is
+                     returned
+    :return: str or None
+    """
+
+    if except_commands is None:
+        except_commands = ['collectstatic']
+
+    var = os.environ.get(name)
+
+    if required and var is None:
+        ignore = set(except_commands)
+        matching_commands = ignore.intersection(sys.argv)
+        if not matching_commands:
+            raise KeyError(f"Environment variable {name} if not defined")
+        else:
+            logger.info(f"Required environment variable {name} was ignored, "
+                        f"as Django was started with {matching_commands}")
+            return "PLACEHOLDER"
+
+    return var
+
 
 # Build paths inside the project like this: os.path.join(BASE_DIR, ...)
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
@@ -25,13 +63,13 @@ BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 # See https://docs.djangoproject.com/en/1.11/howto/deployment/checklist/
 
 # SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = os.environ['SECRET_KEY']
+SECRET_KEY = get_env_var('SECRET_KEY')
 
 # SECURITY WARNING: don't run with debug turned on in production!
-_debug = os.environ.get('DEBUG', '0')
+_debug = get_env_var('DEBUG', required=False)
 DEBUG = _debug == '1'  # only switch on debug if the DEBUG env var is '1'
 
-ALLOWED_HOSTS = [os.environ['HOST']]
+ALLOWED_HOSTS = get_env_var('HOST')
 
 # We're taking the 'real' ALLOWED_HOST from the environment
 # Yet to make sure we're passing the ELB health check, we need to
@@ -97,10 +135,10 @@ WSGI_APPLICATION = 'djangodocker.wsgi.application'
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.postgresql',
-        'NAME': os.environ['DB_NAME'],
-        'USER': os.environ['DB_USER'],
-        'PASSWORD': os.environ['DB_PASSWORD'],
-        'HOST': os.environ['DB_HOST']
+        'NAME': get_env_var('DB_NAME'),
+        'USER': get_env_var('DB_USER'),
+        'PASSWORD': get_env_var('DB_PASSWORD'),
+        'HOST': get_env_var('DB_HOST')
     }
 }
 
@@ -109,18 +147,18 @@ DATABASES = {
 # https://docs.djangoproject.com/en/1.11/ref/settings/#auth-password-validators
 
 AUTH_PASSWORD_VALIDATORS = [
-    {
-        'NAME': 'django.contrib.auth.password_validation.UserAttributeSimilarityValidator',
-    },
-    {
-        'NAME': 'django.contrib.auth.password_validation.MinimumLengthValidator',
-    },
-    {
-        'NAME': 'django.contrib.auth.password_validation.CommonPasswordValidator',
-    },
-    {
-        'NAME': 'django.contrib.auth.password_validation.NumericPasswordValidator',
-    },
+    # {
+    #     'NAME': 'django.contrib.auth.password_validation.UserAttributeSimilarityValidator',
+    # },
+    # {
+    #     'NAME': 'django.contrib.auth.password_validation.MinimumLengthValidator',
+    # },
+    # {
+    #     'NAME': 'django.contrib.auth.password_validation.CommonPasswordValidator',
+    # },
+    # {
+    #     'NAME': 'django.contrib.auth.password_validation.NumericPasswordValidator',
+    # },
 ]
 
 
