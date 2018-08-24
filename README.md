@@ -1,11 +1,32 @@
 Django Todo App in Docker
 =========================
 
-This is an example project for a 
-[blog post on the PyCharm blog](http://blog.jetbrains.com/pycharm/2017/08/using-docker-compose-on-windows-in-pycharm).
-Please read more about it there.
+This is a simple todo app used to demonstrate how to dockerize
+a Django application.
 
-To run the project, set up a Django compatible database (I use PostgreSQL but you're welcome to use something else)
-and configure it in `djangodocker/settings.py`. 
+Getting started
+---------------
 
-To see the Docker version of this code, see the `dockerized` branch of this repo.
+Prerequisite:
+
+- Make sure that Docker and Docker Compose are installed and 
+  working. [See the docs](https://docs.docker.com/install/)
+- Have this repo checked out
+
+Start up the project and apply the migrations by running:
+
+    docker-compose run --rm web python3 manage.py migrate
+    
+If this command fails the first time because it couldn't 
+connect to the DB, wait a couple seconds, and try again.
+The Django server doesn't wait for the DB to come alive,
+so if it's too fast it'll simply say "Cannot connect to DB".
+
+Afterwards, you can start the application with:
+
+    docker-compose up
+    
+The application is exposed on port 8000.
+
+[Check out the PyCharm docs](https://www.jetbrains.com/help/pycharm/using-docker-compose-as-a-remote-interpreter.html)
+for getting started with Docker Compose in PyCharm.
