@@ -1,4 +1,4 @@
-FROM ubuntu:17.10
+FROM ubuntu:18.04
 
 WORKDIR /app
 
@@ -7,6 +7,10 @@ RUN apt-get update && apt-get install --no-install-recommends -y \
     nginx \
     python3-minimal \
     python3-pip \
+    python3-setuptools \
+    python3-dev \
+    libpq-dev \
+    gcc \
     && rm -rf /var/lib/apt/lists/*
 
 RUN groupadd django && useradd -g django django && \
@@ -19,6 +23,7 @@ RUN groupadd django && useradd -g django django && \
 # By copying over requirements first, we make sure that Docker will cache
 # our installed requirements rather than reinstall them on every build
 COPY requirements.txt /app/requirements.txt
+RUN pip3 install --upgrade pip wheel setuptools
 RUN pip3 install -r requirements.txt
 
 USER django
